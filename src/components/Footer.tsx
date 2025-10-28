@@ -33,14 +33,9 @@ export const Footer = () => {
                 </Link>
               </li>
               <li>
-                <a
-                  href="https://dashboard.x402.dev"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
+                <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
                   Dashboard
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

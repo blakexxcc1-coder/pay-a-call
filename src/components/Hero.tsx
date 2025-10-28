@@ -41,10 +41,10 @@ export const Hero = () => {
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
             <Button variant="hero" size="lg" asChild className="group">
-              <a href="https://dashboard.x402.dev" target="_blank" rel="noopener noreferrer">
+              <Link to="/dashboard">
                 Start Building
                 <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={20} />
-              </a>
+              </Link>
             </Button>
             <Button variant="outline" size="lg" asChild>
               <Link to="/docs">

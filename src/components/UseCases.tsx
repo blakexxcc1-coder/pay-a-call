@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Brain, Database, Image, MessageSquare, Music, Video } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const useCases = [
   {
@@ -83,9 +84,9 @@ export const UseCases = () => {
             Ready to turn your API into a business?
           </p>
           <Button variant="gradient" size="lg" asChild>
-            <a href="https://dashboard.x402.dev" target="_blank" rel="noopener noreferrer">
+            <Link to="/dashboard">
               Start Building Now
-            </a>
+            </Link>
           </Button>
         </div>
       </div>

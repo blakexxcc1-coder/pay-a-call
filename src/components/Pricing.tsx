@@ -1,6 +1,7 @@
 import { Check } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const plans = [
   {
@@ -105,13 +106,15 @@ export const Pricing = () => {
                 className="w-full"
                 asChild
               >
-                <a
-                  href={plan.name === "Enterprise" ? "mailto:sales@x402.dev" : "https://dashboard.x402.dev"}
-                  target={plan.name === "Enterprise" ? undefined : "_blank"}
-                  rel={plan.name === "Enterprise" ? undefined : "noopener noreferrer"}
-                >
-                  {plan.cta}
-                </a>
+                {plan.name === "Enterprise" ? (
+                  <a href="mailto:sales@x402.dev">
+                    {plan.cta}
+                  </a>
+                ) : (
+                  <Link to="/dashboard">
+                    {plan.cta}
+                  </Link>
+                )}
               </Button>
             </Card>
           ))}

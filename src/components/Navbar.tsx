@@ -54,9 +54,9 @@ export const Navbar = () => {
               )
             )}
             <Button variant="hero" size="sm" asChild>
-              <a href="https://dashboard.x402.dev" target="_blank" rel="noopener noreferrer">
+              <Link to="/dashboard">
                 Get Started
-              </a>
+              </Link>
             </Button>
           </div>
 
@@ -101,9 +101,9 @@ export const Navbar = () => {
               )
             )}
             <Button variant="hero" className="w-full" asChild>
-              <a href="https://dashboard.x402.dev" target="_blank" rel="noopener noreferrer">
+              <Link to="/dashboard">
                 Get Started
-              </a>
+              </Link>
             </Button>
           </div>
         )}
