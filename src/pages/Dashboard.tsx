@@ -3,6 +3,24 @@ import { Footer } from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { 
   Activity, 
   DollarSign, 
@@ -14,14 +32,36 @@ import {
   RefreshCw,
   Code,
   BarChart3,
-  Clock
+  Clock,
+  Sparkles,
+  Zap
 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+
+const upgradeSchema = z.object({
+  name: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name too long"),
+  email: z.string().trim().email("Invalid email address").max(255, "Email too long"),
+  company: z.string().trim().min(2, "Company name required").max(100, "Company name too long"),
+  monthlyVolume: z.string().min(1, "Please select your monthly volume"),
+  useCase: z.string().trim().min(10, "Please describe your use case (minimum 10 characters)").max(500, "Use case description too long"),
+});
+
+type UpgradeFormData = z.infer<typeof upgradeSchema>;
 
 const Dashboard = () => {
   const { toast } = useToast();
   const [showKey, setShowKey] = useState(false);
+  const [isUpgradeOpen, setIsUpgradeOpen] = useState(false);
+  const [formData, setFormData] = useState<UpgradeFormData>({
+    name: "",
+    email: "",
+    company: "",
+    monthlyVolume: "",
+    useCase: "",
+  });
+  const [formErrors, setFormErrors] = useState<Partial<Record<keyof UpgradeFormData, string>>>({});
   const apiKey = "x402_sk_1a2b3c4d5e6f7g8h9i0j";
 
   const copyToClipboard = (text: string) => {
@@ -30,6 +70,49 @@ const Dashboard = () => {
       title: "Copied!",
       description: "API key copied to clipboard",
     });
+  };
+
+  const handleUpgradeSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      upgradeSchema.parse(formData);
+      setFormErrors({});
+      
+      // Simulate submission
+      toast({
+        title: "Application Submitted! 🎉",
+        description: "We'll review your application and contact you within 24-48 hours if you're a good fit for our Pro or Enterprise tier.",
+      });
+      
+      // Reset form and close dialog
+      setFormData({
+        name: "",
+        email: "",
+        company: "",
+        monthlyVolume: "",
+        useCase: "",
+      });
+      setIsUpgradeOpen(false);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors: Partial<Record<keyof UpgradeFormData, string>> = {};
+        error.errors.forEach((err) => {
+          if (err.path[0]) {
+            errors[err.path[0] as keyof UpgradeFormData] = err.message;
+          }
+        });
+        setFormErrors(errors);
+      }
+    }
+  };
+
+  const handleInputChange = (field: keyof UpgradeFormData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    // Clear error for this field when user starts typing
+    if (formErrors[field]) {
+      setFormErrors(prev => ({ ...prev, [field]: undefined }));
+    }
   };
 
   const stats = [
@@ -94,7 +177,7 @@ const Dashboard = () => {
       <main className="pt-24 pb-16 min-h-screen">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="mb-8 flex justify-between items-center">
+          <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h1 className="text-4xl font-bold mb-2">
                 Welcome back, <span className="gradient-text">Developer</span>
@@ -103,10 +186,130 @@ const Dashboard = () => {
                 Here's what's happening with your API today
               </p>
             </div>
-            <Button variant="outline" size="sm">
-              <RefreshCw size={16} className="mr-2" />
-              Refresh
-            </Button>
+            <div className="flex gap-3">
+              <Button variant="outline" size="sm">
+                <RefreshCw size={16} className="mr-2" />
+                Refresh
+              </Button>
+              
+              <Dialog open={isUpgradeOpen} onOpenChange={setIsUpgradeOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="hero" size="sm" className="animate-glow">
+                    <Zap size={16} className="mr-2" />
+                    Upgrade Plan
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[500px]">
+                  <DialogHeader>
+                    <DialogTitle className="text-2xl flex items-center gap-2">
+                      <Sparkles className="text-primary" />
+                      Upgrade to Pro or Enterprise
+                    </DialogTitle>
+                    <DialogDescription>
+                      Fill out the form below and we'll contact you within 24-48 hours if you're a good fit for our premium tiers.
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <form onSubmit={handleUpgradeSubmit} className="space-y-4 mt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Full Name *</Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) => handleInputChange("name", e.target.value)}
+                        placeholder="John Doe"
+                      />
+                      {formErrors.name && (
+                        <p className="text-sm text-destructive">{formErrors.name}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Work Email *</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => handleInputChange("email", e.target.value)}
+                        placeholder="john@company.com"
+                      />
+                      {formErrors.email && (
+                        <p className="text-sm text-destructive">{formErrors.email}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="company">Company Name *</Label>
+                      <Input
+                        id="company"
+                        value={formData.company}
+                        onChange={(e) => handleInputChange("company", e.target.value)}
+                        placeholder="Acme Inc."
+                      />
+                      {formErrors.company && (
+                        <p className="text-sm text-destructive">{formErrors.company}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="volume">Expected Monthly Volume *</Label>
+                      <Select
+                        value={formData.monthlyVolume}
+                        onValueChange={(value) => handleInputChange("monthlyVolume", value)}
+                      >
+                        <SelectTrigger id="volume">
+                          <SelectValue placeholder="Select volume range" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="10k-100k">10,000 - 100,000 requests</SelectItem>
+                          <SelectItem value="100k-1m">100,000 - 1M requests</SelectItem>
+                          <SelectItem value="1m-10m">1M - 10M requests</SelectItem>
+                          <SelectItem value="10m+">10M+ requests</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {formErrors.monthlyVolume && (
+                        <p className="text-sm text-destructive">{formErrors.monthlyVolume}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="useCase">Use Case Description *</Label>
+                      <Textarea
+                        id="useCase"
+                        value={formData.useCase}
+                        onChange={(e) => handleInputChange("useCase", e.target.value)}
+                        placeholder="Tell us about your project, API use case, and what you're looking to achieve with x402..."
+                        rows={4}
+                      />
+                      {formErrors.useCase && (
+                        <p className="text-sm text-destructive">{formErrors.useCase}</p>
+                      )}
+                    </div>
+
+                    <div className="bg-muted/50 p-4 rounded-lg">
+                      <p className="text-sm text-muted-foreground">
+                        <strong className="text-foreground">What happens next?</strong><br />
+                        Our team will review your application and reach out if your use case aligns with our Pro or Enterprise offerings. We carefully select partners to ensure the best experience.
+                      </p>
+                    </div>
+
+                    <div className="flex gap-3 pt-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => setIsUpgradeOpen(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button type="submit" variant="hero" className="flex-1">
+                        Submit Application
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
 
           {/* Stats Grid */}
